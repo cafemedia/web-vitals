@@ -133,7 +133,7 @@ export const onCLS = (
             opts!.reportAllChanges,
           );
 
-          doubleRAF(() => report(true));
+          doubleRAF(() => report());
         });
 
         // Queue a task to report (if nothing else triggers a report first).
