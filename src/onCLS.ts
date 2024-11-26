@@ -51,6 +51,7 @@ export const CLSThresholds: MetricRatingThresholds = [0.1, 0.25];
 export const onCLS = (
   onReport: (metric: CLSMetric) => void,
   opts?: ReportOpts,
+  customAdThriveReporter?: (LayoutShiftEntry: LayoutShift) => void,
 ) => {
   // Set defaults
   opts = opts || {};
@@ -86,6 +87,13 @@ export const onCLS = (
             } else {
               sessionValue = entry.value;
               sessionEntries = [entry];
+            }
+
+            if (
+              !!customAdThriveReporter &&
+              typeof customAdThriveReporter === 'function'
+            ) {
+              customAdThriveReporter(entry);
             }
           }
         });
@@ -125,7 +133,7 @@ export const onCLS = (
             opts!.reportAllChanges,
           );
 
-          doubleRAF(() => report());
+          doubleRAF(() => report(true));
         });
 
         // Queue a task to report (if nothing else triggers a report first).
