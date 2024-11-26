@@ -23,6 +23,7 @@ import {onHidden} from './lib/onHidden.js';
 import {runOnce} from './lib/runOnce.js';
 import {onFCP} from './onFCP.js';
 import {CLSMetric, MetricRatingThresholds, ReportOpts} from './types.js';
+import {getSelector} from './lib/getSelector.js';
 
 /** Thresholds for CLS. See https://web.dev/articles/cls#what_is_a_good_cls_score */
 export const CLSThresholds: MetricRatingThresholds = [0.1, 0.25];
@@ -88,13 +89,23 @@ export const onCLS = (
               sessionValue = entry.value;
               sessionEntries = [entry];
             }
+          }
 
-            if (
-              !!customAdThriveReporter &&
-              typeof customAdThriveReporter === 'function'
-            ) {
-              customAdThriveReporter(entry);
-            }
+          if (
+            !!customAdThriveReporter &&
+            typeof customAdThriveReporter === 'function'
+          ) {
+            const sourcesWithTarget = entry.sources.map((attribution) => {
+              const {node, previousRect, currentRect} = attribution;
+              return {
+                target: getSelector(node),
+                previousRect,
+                currentRect,
+              };
+            });
+            customAdThriveReporter(
+              Object.assign(entry.toJSON(), {sources: sourcesWithTarget}),
+            );
           }
         });
 
